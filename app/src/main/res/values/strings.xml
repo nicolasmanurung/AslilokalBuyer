@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Aslilokal</string>
+    <string name="title_activity_beranda">MainActivity</string>
+    <string name="title_beranda">Beranda</string>
+    <string name="title_asli_lokal">Asli Lokal</string>
+    <string name="title_pesanan">Pesanan</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_keranjang">Keranjang</string>
+    <string name="title_profil">Profil</string>
+    <string name="notification">Pemberitahuan</string>
+    <string name="message">Pesan</string>
+    <string name="hint_name_product">Saya mau...</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+
+</resources>

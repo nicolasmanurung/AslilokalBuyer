@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_beranda">
+
+    <fragment
+        android:id="@+id/navigation_beranda"
+        android:name="com.aslilokal.buyer.ui.beranda.BerandaFragment"
+        android:label="@string/title_beranda"
+        tools:layout="@layout/fragment_beranda" />
+
+    <fragment
+        android:id="@+id/navigation_aslilokal"
+        android:name="com.aslilokal.buyer.ui.aslilokal.AslilokalFragment"
+        android:label="@string/title_asli_lokal"
+        tools:layout="@layout/fragment_aslilokal" />
+
+    <fragment
+        android:id="@+id/navigation_pesanan"
+        android:name="com.aslilokal.buyer.ui.pesanan.PesananFragment"
+        android:label="@string/title_pesanan"
+        tools:layout="@layout/fragment_pesanan" />
+
+    <fragment
+        android:id="@+id/navigation_keranjang"
+        android:name="com.aslilokal.buyer.ui.keranjang.KeranjangFragment"
+        android:label="@string/title_keranjang"
+        tools:layout="@layout/fragment_keranjang" />
+
+    <fragment
+        android:id="@+id/navigation_profil"
+        android:name="com.aslilokal.buyer.ui.profil.ProfilFragment"
+        android:label="@string/title_profil"
+        tools:layout="@layout/fragment_profil" />
+</navigation>
