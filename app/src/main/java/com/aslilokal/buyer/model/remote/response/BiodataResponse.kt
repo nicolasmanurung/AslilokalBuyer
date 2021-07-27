@@ -19,5 +19,17 @@ data class DetailBiodata(
     val imgKtpBuyer: String?,
     val imgSelfBuyer: String,
     val nameBuyer: String,
-    val noTelpBuyer: String
+    val noTelpBuyer: String,
+    val postalCodeInput: String?,
+    val rajaOngkir: RajaOngkirAddress?
+) : Parcelable
+
+@Parcelize
+data class RajaOngkirAddress(
+    val city_id: String,
+    val city_name: String,
+    val postal_code: String,
+    val province: String,
+    val province_id: String,
+    val type: String?
 ) : Parcelable

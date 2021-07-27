@@ -40,8 +40,9 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+
             <EditText
-                android:id="@+id/etNameSeller"
+                android:id="@+id/etNameBuyer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -53,7 +54,6 @@
                 android:textColorHint="@color/black"
                 app:layout_constraintTop_toBottomOf="@+id/cardView"
                 tools:layout_editor_absoluteX="16dp" />
-
 
             <TextView
                 android:layout_width="wrap_content"
@@ -73,6 +73,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="4dp"
                 android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
                 android:backgroundTint="@color/gray"
                 android:digits="0123456789"
                 android:hint="628xxxxxxx"
@@ -80,6 +81,102 @@
                 android:textColor="@color/black"
                 android:textColorHint="@color/gray"
                 app:layout_constraintTop_toBottomOf="@+id/cardView"
+                tools:ignore="HardcodedText"
+                tools:layout_editor_absoluteX="16dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="4dp"
+                android:background="@color/gray_card" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="Nama Penerima"
+                android:textColor="@color/black"
+                android:textSize="12sp" />
+
+            <EditText
+                android:id="@+id/etNameAccept"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="@color/gray"
+                android:inputType="text"
+                android:textColor="@color/black"
+                android:textColorHint="@color/gray"
+                tools:ignore="HardcodedText"
+                tools:layout_editor_absoluteX="16dp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="Provinsi / Kabupaten"
+                    android:textColor="@color/black"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/txtChangeProvince"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:text="Ganti"
+                    android:textColor="@color/redColor"
+                    android:textSize="12sp"
+                    android:visibility="gone" />
+            </RelativeLayout>
+
+            <AutoCompleteTextView
+                android:id="@+id/originLocation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="16dp"
+                android:backgroundTint="@color/gray"
+                android:inputType="text"
+                android:textColor="@color/black"
+                android:textColorHint="@color/black"
+                app:layout_constraintTop_toBottomOf="@+id/cardView"
+                tools:layout_editor_absoluteX="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="Kode Pos"
+                android:textColor="@color/black"
+                android:textSize="12sp" />
+
+            <EditText
+                android:id="@+id/etPostalCodeInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="@color/gray"
+                android:digits="0123456789"
+                android:inputType="phone"
+                android:textColor="@color/black"
+                android:textColorHint="@color/gray"
                 tools:ignore="HardcodedText"
                 tools:layout_editor_absoluteX="16dp" />
 
@@ -102,11 +199,13 @@
                 android:layout_marginTop="4dp"
                 android:layout_marginEnd="16dp"
                 android:backgroundTint="@color/gray"
+                android:hint="Jl. Melati"
                 android:inputType="text"
                 android:textColor="@color/black"
                 android:textColorHint="@color/black"
                 app:layout_constraintTop_toBottomOf="@+id/cardView"
                 tools:layout_editor_absoluteX="16dp" />
+
 
             <RelativeLayout
                 android:layout_width="match_parent"

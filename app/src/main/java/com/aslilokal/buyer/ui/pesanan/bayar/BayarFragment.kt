@@ -51,7 +51,7 @@ class BayarFragment : Fragment() {
 
         binding.swipeRefresh.setOnRefreshListener {
             viewLifecycleOwner.lifecycleScope.launch {
-                viewModel.getPesanan(token, username, "paymentrequired")
+                viewModel.getPesananBayar(token, username)
             }
             setupObserver()
         }
@@ -62,7 +62,7 @@ class BayarFragment : Fragment() {
     private fun getData() {
         showProgressBar()
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.getPesanan(token, username, "paymentrequired")
+            viewModel.getPesananBayar(token, username)
         }
     }
 
@@ -87,7 +87,8 @@ class BayarFragment : Fragment() {
                 is Resource.Success -> {
                     hideProgressBar()
                     response.data?.result.let { orderResponse ->
-                        orderAdapter.differ.submitList(orderResponse?.toList())
+                        orderAdapter.differ.submitList(
+                            orderResponse?.toList()?.sortedByDescending { it.orderAt })
                         Log.d("RESULT", "Counting")
                         if (orderResponse != null) {
                             Log.d("ISNOTNULL", "Counting")

@@ -8,6 +8,7 @@
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
     <application
         android:allowBackup="true"
@@ -19,6 +20,16 @@
         android:theme="@style/Theme.Aslilokal"
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
+        <activity
+            android:name=".ui.profil.edit.EditProfileBuyerActivity"
+            android:theme="@style/Theme.Design.Light.NoActionBar" />
+        <activity
+            android:name=".ui.search.SearchActivity"
+            android:theme="@style/Theme.Design.Light.NoActionBar" />
+        <activity android:name=".ui.detail.lokal.LokalCategoryActivity" />
+        <activity
+            android:name=".ui.detail.pesanan.DetailPesananActivity"
+            android:theme="@style/Theme.Design.Light.NoActionBar" />
         <activity
             android:name=".ui.keranjang.KeranjangActivity"
             android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
@@ -32,17 +43,6 @@
         <activity
             android:name=".ui.account.verify.BuyerInfoActivity"
             android:theme="@style/Theme.Design.Light.NoActionBar" />
-
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="com.aslilokal.buyer.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/providerfile" />
-        </provider>
-
         <activity
             android:name=".ui.account.verify.EmailVerificationActivity"
             android:theme="@style/Theme.Design.Light.NoActionBar" />
@@ -54,12 +54,14 @@
             android:theme="@style/Theme.Design.Light.NoActionBar" />
         <activity
             android:name=".ui.detail.product.DetailProductActivity"
-            android:screenOrientation="portrait"
+            android:screenOrientation="fullSensor"
             android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
         <activity
             android:name=".BerandaActivity"
-            android:screenOrientation="portrait"
+            android:screenOrientation="fullSensor"
             android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar">
+
+            <!-- main -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -67,9 +69,39 @@
             </intent-filter>
         </activity>
 
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.aslilokal.buyer.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/providerfile" />
+        </provider>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.aslilokal.buyer.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/providerfile" />
+        </provider>
+
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
+
+        <service
+            android:name=".service.FCMService"
+            android:exported="false"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

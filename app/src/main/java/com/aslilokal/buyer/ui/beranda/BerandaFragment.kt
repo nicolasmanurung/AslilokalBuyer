@@ -1,5 +1,6 @@
 package com.aslilokal.buyer.ui.beranda
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -20,6 +21,7 @@ import com.aslilokal.buyer.model.data.api.ApiHelper
 import com.aslilokal.buyer.model.data.api.RetrofitInstance
 import com.aslilokal.buyer.model.local.ItemBerandaMenu
 import com.aslilokal.buyer.ui.adapter.ProductGridAdapter
+import com.aslilokal.buyer.ui.detail.lokal.LokalCategoryActivity
 import com.aslilokal.buyer.utils.Resource
 import com.aslilokal.buyer.viewmodel.AslilokalVMProviderFactory
 import com.bumptech.glide.Glide
@@ -41,6 +43,7 @@ class BerandaFragment : Fragment() {
     var isError = false
     var isLastPage = false
     var isScrolling = false
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -188,7 +191,6 @@ class BerandaFragment : Fragment() {
         binding.rvPopularProduct.apply {
             adapter = productGridAdapter
             layoutManager = GridLayoutManager(binding.root.context, 2)
-//            addOnScrollListener(this@BerandaFragment.scrollNestedListener)
         }
     }
 
@@ -234,16 +236,32 @@ class BerandaFragment : Fragment() {
                 binding.txtNameIconMenu.text = menu.menuName
 
                 itemView.setOnClickListener {
-//                    when (layoutPosition) {
-//                        4 -> {
-//                            binding.root.context.startActivity(
-//                                Intent(
-//                                    binding.root.context,
-//                                    DetailProductActivity::class.java
-//                                )
-//                            )
-//                        }
-//                    }
+                    when (layoutPosition) {
+                        0 -> {
+                            val intent =
+                                Intent(binding.root.context, LokalCategoryActivity::class.java)
+                            intent.putExtra("category", "sembako")
+                            binding.root.context.startActivity(intent)
+                        }
+                        1 -> {
+                            val intent =
+                                Intent(binding.root.context, LokalCategoryActivity::class.java)
+                            intent.putExtra("category", "jasa")
+                            binding.root.context.startActivity(intent)
+                        }
+                        2 -> {
+                            val intent =
+                                Intent(binding.root.context, LokalCategoryActivity::class.java)
+                            intent.putExtra("category", "kuliner")
+                            binding.root.context.startActivity(intent)
+                        }
+                        3 -> {
+                            val intent =
+                                Intent(binding.root.context, LokalCategoryActivity::class.java)
+                            intent.putExtra("category", "fashion")
+                            binding.root.context.startActivity(intent)
+                        }
+                    }
                 }
             }
         }

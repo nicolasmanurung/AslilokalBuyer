@@ -17,6 +17,7 @@ import com.aslilokal.buyer.utils.Constants
 import com.aslilokal.buyer.utils.CustomFunctions
 import com.bumptech.glide.Glide
 import com.bumptech.glide.Priority
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.tuonbondol.textviewutil.strike
 
 
@@ -31,6 +32,7 @@ class ProductLinearAdapter :
 
             Glide.with(itemView.context)
                 .load(Constants.BUCKET_PRODUCT_URL + product.imgProduct)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .priority(Priority.HIGH)
                 .placeholder(R.drawable.loading_animation)
                 .into(binding.imgProduct)
@@ -38,6 +40,7 @@ class ProductLinearAdapter :
             binding.txtCurrentPrice.text =
                 CustomFunctions().formatRupiah(product.priceProduct.toDouble())
             binding.txtNameProduct.text = product.nameProduct
+
             when (product.promoPrice?.toIntOrNull()) {
                 0 -> {
                     binding.lnrPromo.visibility = View.INVISIBLE

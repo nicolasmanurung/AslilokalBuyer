@@ -1,8 +1,11 @@
 package com.aslilokal.buyer.model.data.repository
 
 import com.aslilokal.buyer.model.data.api.ApiHelper
+import com.aslilokal.buyer.model.remote.request.ArrayStringRequest
 import com.aslilokal.buyer.model.remote.request.AuthRequest
+import com.aslilokal.buyer.model.remote.request.BiodataRequest
 import com.aslilokal.buyer.model.remote.request.OrderRequest
+import com.aslilokal.buyer.model.remote.response.DetailBiodata
 import com.aslilokal.buyer.model.remote.response.ItemCart
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -10,6 +13,9 @@ import okhttp3.RequestBody
 class AslilokalRepository(val apiHelper: ApiHelper) {
     suspend fun getAllPopularProduct(page: Int, limit: Int) =
         apiHelper.getAllPopularProduct(page, limit)
+
+    suspend fun getProductByCategorize(type: String, page: Int, limit: Int) =
+        apiHelper.getAllProductByCategorize(type, page, limit)
 
     suspend fun getOneDetailProduct(idProduct: String) = apiHelper.getOneDetailProduct(idProduct)
 
@@ -33,8 +39,8 @@ class AslilokalRepository(val apiHelper: ApiHelper) {
 
     suspend fun postTokenVerifyResubmit(token: String) = apiHelper.postResubmitToken(token)
 
-    suspend fun postProductToCart(token: String, idUser: String, product: ItemCart) =
-        apiHelper.postProductToCart(token, idUser, product)
+    suspend fun postProductToCart(token: String, idUser: String, idProduct: String) =
+        apiHelper.postProductToCart(token, idUser, idProduct)
 
     suspend fun postSellerBiodata(
         token: String,
@@ -43,8 +49,14 @@ class AslilokalRepository(val apiHelper: ApiHelper) {
         idBuyerAccount: RequestBody,
         nameBuyer: RequestBody,
         noTelpBuyer: RequestBody,
-        postalCode: RequestBody?,
-        addressBuyer: RequestBody
+        addressBuyer: RequestBody,
+        postalCodeInput: RequestBody,
+        nameAcceptPackage: RequestBody,
+        cityId: RequestBody,
+        provinceId: RequestBody,
+        provinceName: RequestBody,
+        cityName: RequestBody,
+        postalCode: RequestBody
     ) = apiHelper.postBiodataBuyer(
         token,
         imgKtpBuyer,
@@ -52,8 +64,10 @@ class AslilokalRepository(val apiHelper: ApiHelper) {
         idBuyerAccount,
         nameBuyer,
         noTelpBuyer,
-        postalCode,
-        addressBuyer
+        addressBuyer,
+        postalCodeInput,
+        nameAcceptPackage,
+        cityId, provinceId, provinceName, cityName, postalCode
     )
 
     suspend fun getBiodataBuyer(
@@ -65,4 +79,59 @@ class AslilokalRepository(val apiHelper: ApiHelper) {
         token: String,
         orderRequest: OrderRequest
     ) = apiHelper.postOneOrder(token, orderRequest)
+
+    suspend fun getCitiesRO(
+        key: String
+    ) = apiHelper.getCitiesRO(key)
+
+    suspend fun postCostRO(
+        key: String,
+        origin: String,
+        destination: String,
+        weight: String,
+        courier: String
+    ) = apiHelper.postCostRO(key, origin, destination, weight, courier)
+
+    suspend fun getAllVouchersByBuyer(
+        username: String
+    ) = apiHelper.getAllVouchersByBuyer(username)
+
+    suspend fun deleteProductsFromCart(
+        key: String,
+        username: String,
+        products: String
+    ) = apiHelper.deleteProductsFromCart(key, username, products)
+
+    suspend fun getDetailOrder(
+        key: String,
+        orderId: String
+    ) = apiHelper.getDetailOrder(key, orderId)
+
+    suspend fun getProductsByIdShop(
+        idShop: String
+    ) = apiHelper.getProductsByIdShop(idShop)
+
+    suspend fun getProductShopByName(
+        shopId: String,
+        nameProduct: String
+    ) = apiHelper.getProductShopByName(shopId, nameProduct)
+
+    suspend fun getSearchProductsByName(
+        name: String,
+        type: String,
+        page: Int,
+        limit: Int
+    ) = apiHelper.getSearchProductsByName(name, type, page, limit)
+
+    suspend fun getSearchShopsByName(
+        name: String,
+        page: Int,
+        limit: Int
+    ) = apiHelper.getSearchShopsByName(name, page, limit)
+
+    suspend fun putBuyerBiodata(
+        token: String,
+        idUser: String,
+        biodata: BiodataRequest
+    ) = apiHelper.putBuyerBiodata(token, idUser, biodata)
 }

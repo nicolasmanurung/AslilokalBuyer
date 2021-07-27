@@ -9,13 +9,13 @@ import com.aslilokal.buyer.utils.AslilokalDataStore
 
 class VerifikasiPembayaranActivity : AppCompatActivity() {
     private lateinit var binding: ActivityVerifikasiPembayaranBinding
-    private var datastore = AslilokalDataStore(this)
+    private lateinit var datastore : AslilokalDataStore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityVerifikasiPembayaranBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        datastore = AslilokalDataStore(binding.root.context)
         binding.btnConfirmPayment.setOnClickListener {
             startActivity(Intent(this, BerandaActivity::class.java))
             finish()

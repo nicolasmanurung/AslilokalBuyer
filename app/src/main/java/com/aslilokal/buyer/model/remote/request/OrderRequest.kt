@@ -17,15 +17,18 @@ data class OrderRequest(
     val totalPayment: String,
     val totalProductPrice: String,
     val voucherCode: String,
-    val voucherId: String
+    val voucherId: String,
+    val resiCode: String
 ) : Parcelable
 
 @Parcelize
 data class Product(
+    val idSellerAccount: String,
     val idProduct: String,
     val imgProduct: String,
     val nameProduct: String,
     val noteProduct: String,
     val priceAt: String,
-    val qty: String
+    var qty: String,
+    val productWeight: String
 ) : Parcelable

@@ -7,10 +7,10 @@
         app:showAsAction="ifRoom"
         android:title="@string/notification">
     </item>
-    <item
-        android:id="@+id/message"
-        android:icon="@drawable/ic_baseline_chat_24"
-        app:showAsAction="ifRoom"
-        android:title="@string/message">
-    </item>
+<!--    <item-->
+<!--        android:id="@+id/message"-->
+<!--        android:icon="@drawable/ic_baseline_chat_24"-->
+<!--        app:showAsAction="ifRoom"-->
+<!--        android:title="@string/message">-->
+<!--    </item>-->
 </menu>

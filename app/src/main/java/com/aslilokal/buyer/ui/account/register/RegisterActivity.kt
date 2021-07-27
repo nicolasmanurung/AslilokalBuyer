@@ -12,6 +12,7 @@ import com.aslilokal.buyer.model.data.api.ApiHelper
 import com.aslilokal.buyer.model.data.api.RetrofitInstance
 import com.aslilokal.buyer.model.remote.request.AuthRequest
 import com.aslilokal.buyer.ui.account.login.LoginActivity
+import com.aslilokal.buyer.ui.account.verify.EmailVerificationActivity
 import com.aslilokal.buyer.utils.AslilokalDataStore
 import com.aslilokal.buyer.utils.Resource
 import com.aslilokal.buyer.viewmodel.AslilokalVMProviderFactory
@@ -21,7 +22,7 @@ import kotlinx.coroutines.launch
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
-    private var datastore = AslilokalDataStore(this)
+    private lateinit var datastore: AslilokalDataStore
     private lateinit var viewmodel: RegisterViewModel
     private lateinit var buyerData: AuthRequest
 
@@ -29,6 +30,7 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        datastore = AslilokalDataStore(binding.root.context)
         setupViewModel()
         setupObservers()
 
@@ -101,10 +103,10 @@ class RegisterActivity : AppCompatActivity() {
                                 }
                                 binding.llProgressBar.progressbar.visibility = View.INVISIBLE
 
-                                //val intent = Intent(this, VerifyEmailActivity::class.java)
-//                                intent.putExtra("emailSeller", buyerData.emailBuyer)
-//                                startActivity(intent)
-//                                finish()
+                                val intent = Intent(this, EmailVerificationActivity::class.java)
+                                intent.putExtra("emailBuyer", buyerData.emailBuyer)
+                                startActivity(intent)
+                                finish()
                             }
                         }
                     }

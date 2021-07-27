@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1001798926031",
+    "project_id": "aslilokal-buyer",
+    "storage_bucket": "aslilokal-buyer.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1001798926031:android:d379d0f3d5a728c0b7c1ba",
+        "android_client_info": {
+          "package_name": "com.aslilokal.buyer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1001798926031-q6faq5a72mptho8gr6bo651bb7opr4kr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMsjODTy_1O6j5zknesVTKbMuXR_8nBo8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1001798926031-q6faq5a72mptho8gr6bo651bb7opr4kr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

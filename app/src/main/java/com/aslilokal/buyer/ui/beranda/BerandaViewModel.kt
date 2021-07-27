@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aslilokal.buyer.model.data.repository.AslilokalRepository
 import com.aslilokal.buyer.model.remote.response.ProductResponse
+import com.aslilokal.buyer.utils.Constants.Companion.QUERY_PAGE_SIZE
 import com.aslilokal.buyer.utils.Resource
 import kotlinx.coroutines.launch
 import okio.IOException
@@ -24,7 +25,7 @@ class BerandaViewModel(private val mainRepository: AslilokalRepository) : ViewMo
         try {
             val response = mainRepository.getAllPopularProduct(
                 productPage,
-                5
+                QUERY_PAGE_SIZE
             )
             products.postValue(handleProductResponse(response))
         } catch (t: Throwable) {

@@ -6,13 +6,17 @@ import androidx.lifecycle.viewModelScope
 import com.aslilokal.buyer.model.data.repository.AslilokalRepository
 import com.aslilokal.buyer.model.remote.response.OrderResponse
 import com.aslilokal.buyer.utils.Resource
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import retrofit2.Response
 import java.io.IOException
 
 class PesananViewModel(private var mainRepository: AslilokalRepository) : ViewModel() {
     val orders: MutableLiveData<Resource<OrderResponse>> = MutableLiveData()
     var orderResponse: OrderResponse? = null
+
+    var allOrderResponse: OrderResponse? = null
 
     suspend fun getPesanan(
         token: String,
@@ -23,6 +27,43 @@ class PesananViewModel(private var mainRepository: AslilokalRepository) : ViewMo
         try {
             val response = mainRepository.getOrder(token, idUser, status)
             orders.postValue(handleOrderResponse(response))
+        } catch (exception: Exception) {
+            when (exception) {
+                is IOException -> orders.postValue(Resource.Error("Jaringan lemah"))
+                else -> orders.postValue(Resource.Error("Kesalahan tak terduga"))
+            }
+        }
+    }
+
+    suspend fun getPesananBayar(
+        token: String,
+        idUser: String
+    ) = viewModelScope.launch {
+        orders.postValue(Resource.Loading())
+        try {
+            supervisorScope {
+                val paymentRequiredResponse = async {
+                    mainRepository.getOrder(token, idUser, "paymentrequired")
+                }.await()
+
+                val acceptRequiredResponse = async {
+                    mainRepository.getOrder(token, idUser, "acceptrequired")
+                }.await()
+
+                if (paymentRequiredResponse.body()?.success == true) {
+                    allOrderResponse = paymentRequiredResponse.body()!!
+                }
+                if (acceptRequiredResponse.body()?.success == true) {
+                    acceptRequiredResponse.body()
+                        .let { it?.let { accept -> allOrderResponse?.result?.addAll(accept.result) } }
+                }
+                val securingNull = OrderResponse("Data kosong", arrayListOf(), false)
+                if (allOrderResponse != null) {
+                    orders.postValue(Resource.Success(allOrderResponse ?: securingNull))
+                } else {
+                    orders.postValue(Resource.Error("Nilai kosong"))
+                }
+            }
         } catch (exception: Exception) {
             when (exception) {
                 is IOException -> orders.postValue(Resource.Error("Jaringan lemah"))

@@ -12,20 +12,25 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.content.PermissionChecker
+import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.aslilokal.buyer.BerandaActivity
 import com.aslilokal.buyer.databinding.ActivityBuyerInfoBinding
 import com.aslilokal.buyer.model.data.api.ApiHelper
 import com.aslilokal.buyer.model.data.api.RetrofitInstance
+import com.aslilokal.buyer.model.remote.response.City
 import com.aslilokal.buyer.utils.AslilokalDataStore
+import com.aslilokal.buyer.utils.Constants.Companion.RO_KEY_ID
 import com.aslilokal.buyer.utils.Resource
 import com.aslilokal.buyer.viewmodel.AslilokalVMProviderFactory
+import com.aslilokal.buyer.viewmodel.ROViewModel
 import id.zelory.compressor.Compressor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -40,8 +45,11 @@ import java.io.File
 
 class BuyerInfoActivity : AppCompatActivity() {
     private lateinit var binding: ActivityBuyerInfoBinding
-    private var datastore = AslilokalDataStore(this)
+    private lateinit var datastore: AslilokalDataStore
     private lateinit var viewmodel: VerificationViewModel
+    private lateinit var ROviewmodel: ROViewModel
+    private lateinit var listCity: ArrayList<City>
+    private var isSellectAutocomplete: Boolean? = false
 
     private lateinit var selfPhoto: File
 
@@ -57,9 +65,9 @@ class BuyerInfoActivity : AppCompatActivity() {
     private lateinit var idBuyerAccount: RequestBody
     private lateinit var nameBuyer: RequestBody
     private lateinit var noTelpBuyer: RequestBody
-    private var postalCode: RequestBody? =
-        "".toRequestBody("text/plain".toMediaTypeOrNull())
+    private lateinit var postalCodeInput: RequestBody
     private lateinit var addressBuyer: RequestBody
+    private lateinit var nameAccept: RequestBody
 
     private var STATUS_IMG_PICK = "statusimgpick"
 
@@ -72,19 +80,41 @@ class BuyerInfoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityBuyerInfoBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        datastore = AslilokalDataStore(binding.root.context)
         setupViewmodel()
+        setupROViewmodel()
         setupObserver()
+        setupROObserver()
         hideProgress()
+
 
         runBlocking {
             token = datastore.read("TOKEN").toString()
             idBuyerAccount = datastore.read("USERNAME").toString()
                 .toRequestBody("text/plain".toMediaTypeOrNull())
+            ROviewmodel.getCitiesByRO(RO_KEY_ID)
         }
 
         binding.btnPickSelf.setOnClickListener {
             STATUS_IMG_PICK = "imgSelf"
             onAlertDialog()
+        }
+
+        binding.originLocation.addTextChangedListener {
+            if (it?.isNotEmpty() == true) {
+                binding.txtChangeProvince.visibility = View.VISIBLE
+            }
+            if (getCityFromAutocomplete(it.toString()) == null) {
+                isSellectAutocomplete = false
+            } else {
+                isSellectAutocomplete = false
+                binding.txtChangeProvince.visibility = View.GONE
+            }
+        }
+
+        binding.txtChangeProvince.setOnClickListener {
+            isSellectAutocomplete = false
+            binding.originLocation.setText("")
         }
 
         binding.btnKirim.setOnClickListener {
@@ -94,17 +124,34 @@ class BuyerInfoActivity : AppCompatActivity() {
 
     private fun setupViewmodel() {
         viewmodel = ViewModelProvider(
-            viewModelStore,
+            this,
             AslilokalVMProviderFactory(ApiHelper(RetrofitInstance.api))
         ).get(VerificationViewModel::class.java)
     }
 
+    private fun setupROViewmodel() {
+        ROviewmodel = ViewModelProvider(
+            this,
+            AslilokalVMProviderFactory(ApiHelper(RetrofitInstance.apiRO))
+        ).get(ROViewModel::class.java)
+    }
+
+
     private fun setupData() {
-        if (binding.etNameSeller.text.toString().isEmpty()) {
-            binding.etNameSeller.error = "Harap isi nama kamu"
+        if (getCityFromAutocomplete(binding.originLocation.text.toString()) == null) {
+            binding.originLocation.error = "Isi sesuai pilihan"
+        }
+        if (binding.etNameBuyer.text.toString().isEmpty()) {
+            binding.etNameBuyer.error = "Harap isi nama kamu"
         }
         if (binding.etAddressSeller.text.toString().isEmpty()) {
             binding.etAddressSeller.error = "Ini digunakan untuk pengantaran"
+        }
+        if (binding.etNameAccept.text.toString().isEmpty()) {
+            binding.etNameAccept.error = "Harap isi nama penerima"
+        }
+        if (binding.etPostalCodeInput.text.toString().isEmpty()) {
+            binding.etPostalCodeInput.error = "Harap isi kode pos penerima"
         }
         if (binding.etNoTelp.text.toString().isEmpty()) {
             binding.etNoTelp.error = "Harap isi nomor yang bisa di hubungi ya"
@@ -113,13 +160,32 @@ class BuyerInfoActivity : AppCompatActivity() {
             binding.btnPickSelf.error = "Jangan lupa pilih foto mu ya..."
         } else {
             //setup data
-            nameBuyer = binding.etNameSeller.text.toString()
+            val tempCity = getCityFromAutocomplete(binding.originLocation.text.toString())
+
+            var cityId =
+                tempCity?.city_id.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            var provinceId =
+                tempCity?.province_id.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            var provinceName =
+                tempCity?.province.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            var cityName =
+                tempCity?.city_name.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            var postalCode =
+                tempCity?.postal_code.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+
+            nameAccept =
+                binding.etNameAccept.text.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+
+            nameBuyer = binding.etNameBuyer.text.toString()
                 .toRequestBody("text/plain".toMediaTypeOrNull())
 
             noTelpBuyer = binding.etNoTelp.text.toString()
                 .toRequestBody("text/plain".toMediaTypeOrNull())
 
             addressBuyer = binding.etAddressSeller.text.toString()
+                .toRequestBody("text/plain".toMediaTypeOrNull())
+
+            postalCodeInput = binding.etPostalCodeInput.text.toString()
                 .toRequestBody("text/plain".toMediaTypeOrNull())
 
             imgSelfBuyer = selfPhoto.asRequestBody("image/jpg".toMediaTypeOrNull())
@@ -137,11 +203,73 @@ class BuyerInfoActivity : AppCompatActivity() {
                     idBuyerAccount,
                     nameBuyer,
                     noTelpBuyer,
-                    postalCode,
-                    addressBuyer
+                    addressBuyer, postalCodeInput,
+                    nameAccept,
+                    cityId,
+                    provinceId,
+                    provinceName,
+                    cityName,
+                    postalCode
                 )
             }
         }
+    }
+
+    private fun setupROObserver() {
+        ROviewmodel.citiesResults.observe(this, { response ->
+            when (response) {
+                is Resource.Success -> {
+                    response.data.let { cityResponse ->
+                        hideProgress()
+                        initSpinner(cityResponse?.rajaongkir?.results ?: return@observe)
+                    }
+                }
+
+                is Resource.Loading -> {
+                    showProgress()
+                }
+
+                is Resource.Error -> {
+//                    hideProgress()
+                    Toast.makeText(
+                        binding.root.context,
+                        response.message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        })
+    }
+
+    private fun initSpinner(cityResults: ArrayList<City>) {
+        listCity = cityResults
+        val cities = mutableListOf<String>()
+        for (i in cityResults.indices) cities.add(
+            cityResults[i].province + ", " + cityResults[i].city_name ?: ""
+        )
+        val cityAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, cities)
+        binding.originLocation.setAdapter(cityAdapter)
+        binding.originLocation.setOnItemClickListener { parent, view, position, id ->
+            isSellectAutocomplete = true
+        }
+    }
+
+    private fun getCityFromAutocomplete(city: String): City? {
+        if (isSellectAutocomplete == true) {
+            val textCity = city.split(", ")
+
+            val tempCity = listCity.filter {
+                it.city_name.contains(textCity[1]) ?: false
+            }
+
+            for (i in tempCity.indices) {
+                val matchedCity = tempCity[i].city_name ?: ""
+                if (tempCity[i].city_name == matchedCity) {
+                    return tempCity[i]
+                }
+            }
+        }
+        return null
     }
 
     private fun setupObserver() {
@@ -196,7 +324,7 @@ class BuyerInfoActivity : AppCompatActivity() {
         // set title
         builder.setTitle("Ambil gambar")
         //set content area
-        builder.setMessage("Silahkan pilih gambar produk kamu")
+        builder.setMessage("Silahkan pilih gambar profil kamu")
         builder.setPositiveButton(
             "Dari Galery"
         ) { dialog, id ->

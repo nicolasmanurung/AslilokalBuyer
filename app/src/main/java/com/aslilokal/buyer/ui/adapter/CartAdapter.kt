@@ -3,6 +3,7 @@ package com.aslilokal.buyer.ui.adapter
 import android.content.Intent
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.aslilokal.buyer.R
 import com.aslilokal.buyer.databinding.ItemKeranjangBinding
+import com.aslilokal.buyer.model.remote.request.Product
 import com.aslilokal.buyer.model.remote.response.ItemCart
 import com.aslilokal.buyer.ui.detail.product.DetailProductActivity
 import com.aslilokal.buyer.utils.Constants.Companion.BUCKET_PRODUCT_URL
@@ -20,16 +22,17 @@ import com.bumptech.glide.Glide
 
 class CartAdapter : RecyclerView.Adapter<CartAdapter.CartViewHolder>() {
     //var onCheckItem = ArrayList<ItemCart>()
-    var onCheckItem: ((ItemCart, Boolean) -> Unit)? = null
+    var onCheckItem: ((Product, Boolean) -> Unit)? = null
     var onAddItem: ((String, Int) -> Unit)? = null
     var onSubItem: ((String, Int) -> Unit)? = null
+    var onDeleteItem: ((ItemCart) -> Unit)? = null
 
     inner class CartViewHolder(private val binding: ItemKeranjangBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(itemCart: ItemCart) {
             binding.txtValueNameProduct.text = itemCart.nameProduct
             binding.txtValuePriceProduct.text =
-                CustomFunctions().formatRupiah(itemCart.productPrice.toDouble())
+                CustomFunctions().formatRupiah(itemCart.priceProduct.toDouble())
 
             binding.lnrCatatan.visibility = View.GONE
             binding.txtCatatan.setOnClickListener {
@@ -39,7 +42,6 @@ class CartAdapter : RecyclerView.Adapter<CartAdapter.CartViewHolder>() {
                 binding.lnrCatatan.visibility = View.VISIBLE
             }
 
-            binding.etValueProduct.setText(itemCart.qtyProduct.toString())
             binding.etValueProduct.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(
                     s: CharSequence?,
@@ -86,15 +88,27 @@ class CartAdapter : RecyclerView.Adapter<CartAdapter.CartViewHolder>() {
             })
 
             binding.checkboxProduct.setOnCheckedChangeListener { buttonView, isChecked ->
+                var tempPriceProduct = itemCart.promoPrice ?: itemCart.priceProduct.toInt()
+                val tempData = Product(
+                    itemCart.idSellerAccount,
+                    itemCart._id,
+                    itemCart.imgProduct,
+                    itemCart.nameProduct,
+                    binding.etCatatanProduct.text.toString(),
+                    tempPriceProduct.toString(),
+                    binding.etValueProduct.text.toString(),
+                    itemCart.productWeight.toString()
+                )
                 if (isChecked) {
-                    val tempData = itemCart
-                    tempData.qtyProduct = binding.etValueProduct.text.toString().toInt()
                     onCheckItem?.invoke(tempData, true)
                 } else {
-                    val tempData = itemCart
-                    tempData.qtyProduct = binding.etValueProduct.text.toString().toInt()
                     onCheckItem?.invoke(tempData, false)
                 }
+            }
+
+            binding.btnDelete.setOnClickListener {
+                Log.d("ITEMCART", itemCart.toString())
+                onDeleteItem?.invoke(itemCart)
             }
 
             binding.btnSubstract.setOnClickListener {
@@ -113,6 +127,7 @@ class CartAdapter : RecyclerView.Adapter<CartAdapter.CartViewHolder>() {
                 binding.etValueProduct.setText(currentText.toString())
             }
 
+
             Glide.with(itemView.context)
                 .load(BUCKET_PRODUCT_URL + itemCart.imgProduct)
                 .placeholder(R.drawable.loading_animation)
@@ -120,7 +135,7 @@ class CartAdapter : RecyclerView.Adapter<CartAdapter.CartViewHolder>() {
 
             itemView.setOnClickListener {
                 var intent = Intent(binding.root.context, DetailProductActivity::class.java)
-                intent.putExtra("idProduct", itemCart.idProduct)
+                intent.putExtra("idProduct", itemCart._id)
                 intent.putExtra("idShop", itemCart.idSellerAccount)
                 binding.root.context.startActivity(intent)
             }

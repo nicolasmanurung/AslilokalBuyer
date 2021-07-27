@@ -12,18 +12,21 @@ data class CartBuyerResponse(
 
 @Parcelize
 data class ItemCart(
-    val __v: Int?,
-    val _id: String?,
-    val addressShop: String,
-    val idBuyerAccount: String,
-    val idProduct: String,
+    val __v: Int,
+    val _id: String,
+    val createAt: String,
+    val descProduct: String,
     val idSellerAccount: String,
-    val categoryProduct: String?,
     val imgProduct: String,
-    val isLocalShop: Boolean?,
-    val nameProduct: String?,
-    val nameShop: String,
-    val noteProduct: String?,
-    val productPrice: Int,
-    var qtyProduct: Int
+    val isAvailable: Boolean,
+    val lastUpdateAt: String,
+    val nameProduct: String,
+    val priceProduct: String,
+    val priceServiceRange: String,
+    val productCategory: String,
+    val productWeight: Int,
+    val promoPrice: Int?,
+    val promotionTags: ArrayList<String>,
+    val sumCountView: Int,
+    val umkmTags: String
 ) : Parcelable

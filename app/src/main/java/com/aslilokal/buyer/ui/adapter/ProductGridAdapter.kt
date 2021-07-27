@@ -16,6 +16,7 @@ import com.aslilokal.buyer.utils.Constants.Companion.BUCKET_PRODUCT_URL
 import com.aslilokal.buyer.utils.CustomFunctions
 import com.bumptech.glide.Glide
 import com.bumptech.glide.Priority
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.tuonbondol.textviewutil.strike
 
 class ProductGridAdapter :
@@ -29,6 +30,7 @@ class ProductGridAdapter :
 
             Glide.with(itemView.context)
                 .load(BUCKET_PRODUCT_URL + product.imgProduct)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .priority(Priority.HIGH)
                 .into(binding.imgProduct)
 

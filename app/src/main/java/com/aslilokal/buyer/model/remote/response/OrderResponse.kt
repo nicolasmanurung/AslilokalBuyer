@@ -33,7 +33,8 @@ data class ResultOrder(
     val voucherId: String,
     val acceptAt: String,
     val finishAt: String,
-    val orderAt: String
+    val orderAt: String,
+    val resiCode: String?
 ) : Parcelable
 
 @Parcelize
@@ -44,5 +45,6 @@ data class ProductOrder(
     val nameProduct: String,
     val noteProduct: String,
     val priceAt: Int,
-    val qty: Int
+    val qty: Int,
+    val productWeight: Int
 ) : Parcelable

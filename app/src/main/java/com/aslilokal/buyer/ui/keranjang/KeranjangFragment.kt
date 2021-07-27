@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -14,14 +15,18 @@ import com.aslilokal.buyer.R
 import com.aslilokal.buyer.databinding.FragmentKeranjangBinding
 import com.aslilokal.buyer.model.data.api.ApiHelper
 import com.aslilokal.buyer.model.data.api.RetrofitInstance
-import com.aslilokal.buyer.model.remote.response.ItemCart
+import com.aslilokal.buyer.model.remote.request.Product
 import com.aslilokal.buyer.ui.adapter.CartAdapter
 import com.aslilokal.buyer.ui.pembayaran.detailpembayaran.DetailPembayaranActivity
 import com.aslilokal.buyer.utils.AslilokalDataStore
 import com.aslilokal.buyer.utils.CustomFunctions
 import com.aslilokal.buyer.utils.Resource
 import com.aslilokal.buyer.viewmodel.AslilokalVMProviderFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.io.IOException
 
 class KeranjangFragment : Fragment() {
     private var _binding: FragmentKeranjangBinding? = null
@@ -32,7 +37,7 @@ class KeranjangFragment : Fragment() {
     private lateinit var username: String
     private lateinit var token: String
     private lateinit var datastore: AslilokalDataStore
-    private var listCartCheck = ArrayList<ItemCart>()
+    private var listCartCheck = ArrayList<Product>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -54,13 +59,13 @@ class KeranjangFragment : Fragment() {
         }
 
         keranjangAdapter.onAddItem = { data, value ->
-            listCartCheck.mapInPlace { if (it._id == data) getItemCart(it, value) else it }
+            listCartCheck.mapInPlace { if (it.idProduct == data) getItemCart(it, value) else it }
             Log.d("SUMVALUECURRENT", listCartCheck.toString())
             refreshLnrData()
         }
 
         keranjangAdapter.onSubItem = { data, value ->
-            listCartCheck.mapInPlace { if (it._id == data) getItemCart(it, value) else it }
+            listCartCheck.mapInPlace { if (it.idProduct == data) getItemCart(it, value) else it }
             Log.d("SUMVALUECURRENT", data)
             refreshLnrData()
         }
@@ -76,6 +81,11 @@ class KeranjangFragment : Fragment() {
             }
         }
 
+        keranjangAdapter.onDeleteItem = { data ->
+            var tempIdProduct = data._id
+            sendDeleteProductsFromCart(tempIdProduct)
+        }
+
         binding.btnBayar.setOnClickListener {
             var intent = Intent(activity, DetailPembayaranActivity::class.java)
             intent.putParcelableArrayListExtra("LISTPRODUCT", listCartCheck)
@@ -85,10 +95,9 @@ class KeranjangFragment : Fragment() {
         return binding.root
     }
 
-    private fun getItemCart(data: ItemCart, qtyValue: Int): ItemCart {
-        val newItemCart = data
-        newItemCart.qtyProduct = qtyValue
-        return newItemCart
+    private fun getItemCart(data: Product, qtyValue: Int): Product {
+        data.qty = qtyValue.toString()
+        return data
     }
 
     private fun refreshLnrData() {
@@ -97,7 +106,7 @@ class KeranjangFragment : Fragment() {
             var tempSumData = 0
             var differentSellerCount = 0
             for (item in listCartCheck) {
-                tempSumData += item.productPrice * item.qtyProduct
+                tempSumData += item.priceAt.toInt() * item.qty.toInt()
                 if (item.idSellerAccount != listCartCheck.first().idSellerAccount) {
                     differentSellerCount++
                 }
@@ -172,6 +181,44 @@ class KeranjangFragment : Fragment() {
             }
         })
     }
+
+    private fun sendDeleteProductsFromCart(idProduct: String) =
+        CoroutineScope(Dispatchers.Main).launch {
+            showLoading()
+            try {
+                val response =
+                    RetrofitInstance.api.deleteProductsFromCart(token, username, idProduct)
+                if (response.isSuccessful) {
+                    hideLoading()
+                    viewModel.cartBuyers.postValue(null)
+                    viewModel.getCartBuyer(token, username)
+                } else {
+                    Toast.makeText(
+                        binding.root.context,
+                        "Jaringan lemah",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    hideLoading()
+                }
+            } catch (exception: Exception) {
+                hideLoading()
+                when (exception) {
+                    is IOException -> Toast.makeText(
+                        binding.root.context,
+                        "Jaringan lemah",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    else -> {
+                        Toast.makeText(
+                            binding.root.context,
+                            "Kesalahan tak terduga",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        Log.d("KESALAHAN", exception.toString())
+                    }
+                }
+            }
+        }
 
     override fun onDestroyView() {
         super.onDestroyView()

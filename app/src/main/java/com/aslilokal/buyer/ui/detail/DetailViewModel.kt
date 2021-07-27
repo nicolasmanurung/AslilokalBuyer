@@ -4,10 +4,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aslilokal.buyer.model.data.repository.AslilokalRepository
-import com.aslilokal.buyer.model.remote.response.ItemCart
-import com.aslilokal.buyer.model.remote.response.OneProductResponse
-import com.aslilokal.buyer.model.remote.response.ShopDetailResponse
-import com.aslilokal.buyer.model.remote.response.StatusResponse
+import com.aslilokal.buyer.model.remote.response.*
+import com.aslilokal.buyer.utils.Constants.Companion.QUERY_PAGE_SIZE
 import com.aslilokal.buyer.utils.Resource
 import kotlinx.coroutines.launch
 import okio.IOException
@@ -21,6 +19,13 @@ class DetailViewModel(private val mainRepository: AslilokalRepository) : ViewMod
 
     val cart: MutableLiveData<Resource<StatusResponse>> = MutableLiveData()
     private var cartResponse: StatusResponse? = null
+
+    val allProducts: MutableLiveData<Resource<ProductResponse>> = MutableLiveData()
+    private var allProductResponse: ProductResponse? = null
+    var productPage = 1
+
+    val detailOrders: MutableLiveData<Resource<DetailOrderResponse>> = MutableLiveData()
+    private var detailOrderResponse: DetailOrderResponse? = null
 
     fun getProduct(idProduct: String) = viewModelScope.launch {
         callProductResponse(idProduct)
@@ -64,7 +69,6 @@ class DetailViewModel(private val mainRepository: AslilokalRepository) : ViewMod
                         shop.postValue(Resource.Success(oneShopResponse))
                     }
                 }
-
             } else {
                 shop.postValue(Resource.Error(response.message()))
             }
@@ -78,12 +82,12 @@ class DetailViewModel(private val mainRepository: AslilokalRepository) : ViewMod
 
     suspend fun postProductToCart(
         token: String,
-        idUser:String,
-        product: ItemCart
+        idUser: String,
+        idProduct: String
     ) = viewModelScope.launch {
         cart.postValue(Resource.Loading())
         try {
-            val response = mainRepository.postProductToCart(token,idUser, product)
+            val response = mainRepository.postProductToCart(token, idUser, idProduct)
             if (response.isSuccessful) {
                 response.body()?.let { cartResult ->
                     if (cartResponse == null) {
@@ -96,8 +100,67 @@ class DetailViewModel(private val mainRepository: AslilokalRepository) : ViewMod
             }
         } catch (exception: Exception) {
             when (exception) {
-                is java.io.IOException -> cart.postValue(Resource.Error("Jaringan lemah"))
+                is IOException -> cart.postValue(Resource.Error("Jaringan lemah"))
                 else -> cart.postValue(Resource.Error("Kesalahan tak terduga"))
+            }
+        }
+    }
+
+    suspend fun getAllProductByCategorize(
+        type: String
+    ) = viewModelScope.launch {
+        allProducts.postValue(Resource.Loading())
+        try {
+            val response = mainRepository.getProductByCategorize(
+                type, productPage,
+                QUERY_PAGE_SIZE
+            )
+            if (response.isSuccessful) {
+                response.body()?.let { productResult ->
+                    productPage++
+                    if (allProductResponse == null) {
+                        allProductResponse = productResult
+                    } else {
+                        val oldProducts = allProductResponse?.result?.docs
+                        val newProducts = productResult.result.docs
+                        if (newProducts != null) {
+                            oldProducts?.addAll(newProducts)
+                        }
+                    }
+                    allProducts.postValue(Resource.Success(allProductResponse ?: productResult))
+                }
+            } else {
+                allProducts.postValue(Resource.Error(response.message()))
+            }
+        } catch (exception: Exception) {
+            when (exception) {
+                is IOException -> allProducts.postValue(Resource.Error("Jaringan lemah"))
+                else -> allProducts.postValue(Resource.Error("Kesalahan tak terduga"))
+            }
+        }
+    }
+
+    suspend fun getDetailProduct(
+        token: String,
+        idOrder: String
+    ) = viewModelScope.launch {
+        detailOrders.postValue(Resource.Loading())
+        try {
+            val response = mainRepository.getDetailOrder(token, idOrder)
+            if (response.isSuccessful) {
+                response.body()?.let { detailResult ->
+                    if (detailOrderResponse == null) {
+                        detailOrderResponse = detailResult
+                    }
+                    detailOrders.postValue(Resource.Success(detailOrderResponse ?: detailResult))
+                }
+            } else {
+                detailOrders.postValue(Resource.Error(response.message()))
+            }
+        } catch (exception: Exception) {
+            when (exception) {
+                is IOException -> detailOrders.postValue(Resource.Error("Jaringan lemah"))
+                else -> detailOrders.postValue(Resource.Error("Kesalahan tak terduga"))
             }
         }
     }

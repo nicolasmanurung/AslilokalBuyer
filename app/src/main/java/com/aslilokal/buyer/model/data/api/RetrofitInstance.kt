@@ -21,8 +21,25 @@ class RetrofitInstance {
                 .build()
         }
 
+        private val retrofitRO by lazy {
+            val logging = HttpLoggingInterceptor()
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY)
+            val client = OkHttpClient.Builder()
+                .addInterceptor(logging)
+                .build()
+            Retrofit.Builder()
+                .baseUrl(Constants.BASE_URL_RO)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
+                .build()
+        }
+
         val api by lazy {
             retrofit.create(AslilokalAPI::class.java)
+        }
+
+        val apiRO by lazy {
+            retrofitRO.create(AslilokalAPI::class.java)
         }
     }
 }

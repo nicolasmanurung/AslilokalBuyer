@@ -20,6 +20,8 @@ data class Shop(
     val idSellerAccount: String,
     val imgShop: String,
     val isDelivery: Boolean,
+    val isShopFreeDelivery: Boolean?,
+    val postalCodeInput: String,
     val isPickup: Boolean,
     val isTwentyFourHours: Boolean,
     val nameShop: String,
@@ -28,5 +30,6 @@ data class Shop(
     val openTime: String,
     val shopTypeStatus: String?,
     val sumFollowers: Int,
-    val validityTypeStatus: String
+    val validityTypeStatus: String,
+    val rajaOngkir: RajaOngkirAddress
 ) : Parcelable

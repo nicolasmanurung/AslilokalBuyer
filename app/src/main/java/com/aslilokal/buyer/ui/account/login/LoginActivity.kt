@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.aslilokal.buyer.BerandaActivity
 import com.aslilokal.buyer.databinding.ActivityLoginBinding
 import com.aslilokal.buyer.model.data.api.ApiHelper
@@ -16,15 +15,15 @@ import com.aslilokal.buyer.ui.account.register.RegisterActivity
 import com.aslilokal.buyer.ui.account.verify.BuyerInfoActivity
 import com.aslilokal.buyer.ui.account.verify.EmailVerificationActivity
 import com.aslilokal.buyer.utils.AslilokalDataStore
-import com.aslilokal.buyer.utils.Resource
 import com.aslilokal.buyer.viewmodel.AslilokalVMProviderFactory
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
-    private var datastore = AslilokalDataStore(this)
+    private lateinit var datastore : AslilokalDataStore
     private lateinit var viewmodel: LoginViewModel
     private lateinit var buyerData: AuthRequest
 
@@ -32,8 +31,9 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        datastore = AslilokalDataStore(binding.root.context)
+
         setupViewModel()
-        setupObservers()
 
         binding.lnrDaftar.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
@@ -58,9 +58,7 @@ class LoginActivity : AppCompatActivity() {
                     passBuyer,
                     null
                 )
-                lifecycleScope.launch {
-                    viewmodel.postLoginRequest(buyerData)
-                }
+                loginUser(buyerData)
             }
         }
 
@@ -73,104 +71,93 @@ class LoginActivity : AppCompatActivity() {
         ).get(LoginViewModel::class.java)
     }
 
-    private fun setupObservers() {
-        viewmodel.logins.observe(this, { response ->
-            when (response) {
-                is Resource.Success -> {
-                    response.data.let { loginResponse ->
-                        if (loginResponse?.success == false) {
-                            Toast.makeText(
-                                binding.root.context,
-                                loginResponse.message,
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        } else if (loginResponse?.success == true) {
-                            if (loginResponse.emailVerifyStatus && loginResponse.biodataVerifyStatus) {
-                                GlobalScope.launch(Dispatchers.IO) {
-                                    datastore.save(
-                                        "ISLOGIN",
-                                        "true"
-                                    )
-
-                                    datastore.save(
-                                        "USERNAME",
-                                        loginResponse.username.toString()
-                                    )
-
-                                    datastore.save(
-                                        "TOKEN",
-                                        "JWT " + loginResponse.token.toString()
-                                    )
-                                }
-
-                                binding.llProgressBar.progressbar.visibility = View.INVISIBLE
-
-                                val intent = Intent(this, BerandaActivity::class.java)
-                                startActivity(intent)
-                                finish()
-
-                            } else if (!loginResponse.emailVerifyStatus && !loginResponse.biodataVerifyStatus) {
-                                GlobalScope.launch(Dispatchers.IO) {
-                                    datastore.save(
-                                        "ISLOGIN",
-                                        "false"
-                                    )
-
-                                    datastore.save(
-                                        "USERNAME",
-                                        loginResponse.username.toString()
-                                    )
-
-                                    datastore.save(
-                                        "TOKEN",
-                                        "JWT " + loginResponse.token.toString()
-                                    )
-                                }
-                                binding.llProgressBar.progressbar.visibility = View.INVISIBLE
-                                val intent = Intent(this, EmailVerificationActivity::class.java)
-                                intent.putExtra("emailBuyer", buyerData.emailBuyer)
-                                startActivity(intent)
-                                finish()
-                            } else if (loginResponse.emailVerifyStatus && !loginResponse.biodataVerifyStatus) {
-                                GlobalScope.launch(Dispatchers.IO) {
-                                    datastore.save(
-                                        "ISLOGIN",
-                                        "false"
-                                    )
-
-                                    datastore.save(
-                                        "USERNAME",
-                                        loginResponse.username.toString()
-                                    )
-
-                                    datastore.save(
-                                        "TOKEN",
-                                        "JWT " + loginResponse.token.toString()
-                                    )
-                                }
-                                binding.llProgressBar.progressbar.visibility = View.INVISIBLE
-                                val intent = Intent(this, BuyerInfoActivity::class.java)
-                                intent.putExtra("emailBuyer", buyerData.emailBuyer)
-                                startActivity(intent)
-                                finish()
-                            }
-                        }
-                    }
-                }
-
-                is Resource.Loading -> {
-                    binding.llProgressBar.progressbar.visibility = View.VISIBLE
-                }
-
-                is Resource.Error -> {
-                    binding.llProgressBar.progressbar.visibility = View.INVISIBLE
+    private fun loginUser(buyerData: AuthRequest) = CoroutineScope(Dispatchers.Main).launch {
+        binding.llProgressBar.progressbar.visibility = View.VISIBLE
+        val response = RetrofitInstance.api.postLoginBuyer(buyerData)
+        if (response.isSuccessful) {
+            binding.llProgressBar.progressbar.visibility = View.GONE
+            response.body().let { loginResponse ->
+                if (loginResponse?.success == false) {
                     Toast.makeText(
                         binding.root.context,
-                        "Maaf ada kesalahan",
+                        loginResponse.message,
                         Toast.LENGTH_SHORT
                     ).show()
+                } else if (loginResponse?.success == true) {
+                    if (loginResponse.emailVerifyStatus && loginResponse.biodataVerifyStatus) {
+                        GlobalScope.launch(Dispatchers.IO) {
+                            datastore.save(
+                                "ISLOGIN",
+                                "true"
+                            )
+
+                            datastore.save(
+                                "USERNAME",
+                                loginResponse.username.toString()
+                            )
+
+                            datastore.save(
+                                "TOKEN",
+                                "JWT " + loginResponse.token.toString()
+                            )
+                        }
+                        val intent = Intent(binding.root.context, BerandaActivity::class.java)
+                        startActivity(intent)
+                        finish()
+
+                    } else if (!loginResponse.emailVerifyStatus && !loginResponse.biodataVerifyStatus) {
+                        GlobalScope.launch(Dispatchers.IO) {
+                            datastore.save(
+                                "ISLOGIN",
+                                "false"
+                            )
+
+                            datastore.save(
+                                "USERNAME",
+                                loginResponse.username.toString()
+                            )
+
+                            datastore.save(
+                                "TOKEN",
+                                "JWT " + loginResponse.token.toString()
+                            )
+                        }
+                        val intent =
+                            Intent(binding.root.context, EmailVerificationActivity::class.java)
+                        intent.putExtra("emailBuyer", buyerData.emailBuyer)
+                        startActivity(intent)
+                        finish()
+                    } else if (loginResponse.emailVerifyStatus && !loginResponse.biodataVerifyStatus) {
+                        GlobalScope.launch(Dispatchers.IO) {
+                            datastore.save(
+                                "ISLOGIN",
+                                "false"
+                            )
+
+                            datastore.save(
+                                "USERNAME",
+                                loginResponse.username.toString()
+                            )
+
+                            datastore.save(
+                                "TOKEN",
+                                "JWT " + loginResponse.token.toString()
+                            )
+                        }
+                        val intent = Intent(binding.root.context, BuyerInfoActivity::class.java)
+                        intent.putExtra("emailBuyer", buyerData.emailBuyer)
+                        startActivity(intent)
+                        finish()
+                    }
                 }
             }
-        })
+        } else {
+            binding.llProgressBar.progressbar.visibility = View.GONE
+            Toast.makeText(
+                binding.root.context,
+                "Maaf ada kesalahan",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 }

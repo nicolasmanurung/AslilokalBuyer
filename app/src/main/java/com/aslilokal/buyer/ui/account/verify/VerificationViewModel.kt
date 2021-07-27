@@ -87,8 +87,14 @@ class VerificationViewModel(private val mainRepository: AslilokalRepository) : V
         idBuyerAccount: RequestBody,
         nameBuyer: RequestBody,
         noTelpBuyer: RequestBody,
-        postalCode: RequestBody?,
-        addressBuyer: RequestBody
+        addressBuyer: RequestBody,
+        postalCodeInput: RequestBody,
+        nameAcceptPackage: RequestBody,
+        cityId: RequestBody,
+        provinceId: RequestBody,
+        provinceName: RequestBody,
+        cityName: RequestBody,
+        postalCode: RequestBody
     ) = viewModelScope.launch {
         biodataResults.postValue(Resource.Loading())
         try {
@@ -99,8 +105,10 @@ class VerificationViewModel(private val mainRepository: AslilokalRepository) : V
                 idBuyerAccount,
                 nameBuyer,
                 noTelpBuyer,
-                postalCode,
-                addressBuyer
+                addressBuyer,
+                postalCodeInput,
+                nameAcceptPackage,
+                cityId, provinceId, provinceName, cityName, postalCode
             )
             if (response.isSuccessful) {
                 Log.d("VMSUCCESS", "true")

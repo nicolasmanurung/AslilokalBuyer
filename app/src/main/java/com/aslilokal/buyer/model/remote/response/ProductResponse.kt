@@ -42,5 +42,6 @@ data class Product(
     val productWeight: Int,
     val umkmTags: String?,
     val promotionTags: ArrayList<String>?,
-    val promoPrice: String? = null
+    val promoPrice: String? = null,
+    val sumCountView: Int
 ) : Parcelable

@@ -2,6 +2,7 @@ package com.aslilokal.buyer
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -11,29 +12,44 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
 import com.aslilokal.buyer.databinding.ActivityBerandaBinding
 import com.aslilokal.buyer.ui.account.login.LoginActivity
+import com.aslilokal.buyer.ui.search.SearchActivity
 import com.aslilokal.buyer.utils.AslilokalDataStore
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.*
 
-class BerandaActivity : AppCompatActivity() {
+const val NOTIFICATION_TOPIC = "/topics/notification-"
 
+class BerandaActivity : AppCompatActivity() {
     private lateinit var binding: ActivityBerandaBinding
-    private var datastore = AslilokalDataStore(this)
+    private lateinit var datastore: AslilokalDataStore
     private var isLogin: Boolean? = false
+    private lateinit var username: String
     private var doubleBackToExitPressedOnce = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityBerandaBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        datastore = AslilokalDataStore(binding.root.context)
         runBlocking {
             isLogin = datastore.read("ISLOGIN").toString().toBoolean()
+            username = datastore.read("USERNAME").toString()
+        }
+
+        if (isLogin == true) {
+            FirebaseMessaging.getInstance().token.addOnSuccessListener {
+                CoroutineScope(Dispatchers.IO).launch {
+                    datastore.save("devicetoken", it)
+                }
+            }
+            val finalTopic = "$NOTIFICATION_TOPIC$username"
+            Log.d("FINALTOPIC", finalTopic)
+            FirebaseMessaging.getInstance().subscribeToTopic(finalTopic)
         }
 
         setSupportActionBar(binding.mainToolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
-
-        //Set is Login
 
         val navView: BottomNavigationView = findViewById(R.id.navView)
         val navController = findNavController(R.id.nav_host_fragment)
@@ -104,6 +120,10 @@ class BerandaActivity : AppCompatActivity() {
                 }
             }
         }
+
+        binding.lnrSearchMain.setOnClickListener {
+            startActivity(Intent(this, SearchActivity::class.java))
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -115,7 +135,6 @@ class BerandaActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.notification -> {
 //                startActivity(Intent(this, NotificationActivity::class.java))
-
                 Toast.makeText(
                     binding.root.context,
                     "Sedang dalam tahap pengembangan",
@@ -123,14 +142,14 @@ class BerandaActivity : AppCompatActivity() {
                 ).show()
                 return true
             }
-            R.id.message -> {
-                Toast.makeText(
-                    binding.root.context,
-                    "Sedang dalam tahap pengembangan",
-                    Toast.LENGTH_SHORT
-                ).show()
-                return true
-            }
+//            R.id.message -> {
+//                Toast.makeText(
+//                    binding.root.context,
+//                    "Sedang dalam tahap pengembangan",
+//                    Toast.LENGTH_SHORT
+//                ).show()
+//                return true
+//            }
             else -> return super.onOptionsItemSelected(item)
         }
     }

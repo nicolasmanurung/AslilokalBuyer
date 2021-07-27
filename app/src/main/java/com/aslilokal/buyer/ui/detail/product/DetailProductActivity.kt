@@ -3,7 +3,9 @@ package com.aslilokal.buyer.ui.detail.product
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
@@ -15,11 +17,11 @@ import com.aslilokal.buyer.R
 import com.aslilokal.buyer.databinding.ActivityDetailProductBinding
 import com.aslilokal.buyer.model.data.api.ApiHelper
 import com.aslilokal.buyer.model.data.api.RetrofitInstance
-import com.aslilokal.buyer.model.remote.response.ItemCart
 import com.aslilokal.buyer.model.remote.response.OneProduct
 import com.aslilokal.buyer.model.remote.response.Shop
 import com.aslilokal.buyer.ui.detail.DetailViewModel
 import com.aslilokal.buyer.ui.keranjang.KeranjangActivity
+import com.aslilokal.buyer.ui.shop.DetailShopActivity
 import com.aslilokal.buyer.utils.AslilokalDataStore
 import com.aslilokal.buyer.utils.Constants.Companion.BUCKET_PRODUCT_URL
 import com.aslilokal.buyer.utils.Constants.Companion.BUCKET_USR_URL
@@ -28,6 +30,7 @@ import com.aslilokal.buyer.utils.Resource
 import com.aslilokal.buyer.viewmodel.AslilokalVMProviderFactory
 import com.bumptech.glide.Glide
 import com.bumptech.glide.Priority
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.tuonbondol.textviewutil.strike
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -40,19 +43,20 @@ class DetailProductActivity : AppCompatActivity() {
     private lateinit var viewModel: DetailViewModel
     private lateinit var idProduct: String
     private lateinit var idShop: String
-    private lateinit var productToCart: ItemCart
     private lateinit var idBuyer: String
     private lateinit var token: String
     private var isLogin: Boolean? = false
     private var shopInfo: Shop? = null
     private var isAvailable: Boolean? = false
     private var productInfo: OneProduct? = null
-    private var datastore = AslilokalDataStore(this)
+    private lateinit var datastore: AslilokalDataStore
+    private var productType: String? = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDetailProductBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        datastore = AslilokalDataStore(binding.root.context)
 
         runBlocking {
             isLogin = datastore.read("ISLOGIN").toString().toBoolean()
@@ -64,26 +68,9 @@ class DetailProductActivity : AppCompatActivity() {
                 binding.optionKeranjang.setOnClickListener {
                     startActivity(Intent(binding.root.context, KeranjangActivity::class.java))
                 }
-
                 binding.btnAddToCart.setOnClickListener {
-                    productToCart = ItemCart(
-                        null,
-                        null,
-                        shopInfo?.addressShop.toString(),
-                        "",
-                        idProduct,
-                        idShop,
-                        productInfo?.productCategory.toString(),
-                        productInfo?.imgProduct.toString(),
-                        false,
-                        productInfo?.nameProduct.toString(),
-                        shopInfo?.nameShop.toString(),
-                        "",
-                        productInfo?.priceProduct.toString().toInt(),
-                        1
-                    )
                     lifecycleScope.launch {
-                        viewModel.postProductToCart(token, idBuyer, productToCart)
+                        viewModel.postProductToCart(token, idBuyer, idProduct)
                     }
                 }
             } else {
@@ -122,6 +109,31 @@ class DetailProductActivity : AppCompatActivity() {
         setupObserverOneProduct()
         setupObserverDetailShop()
         setupObserverPostToCart()
+
+        binding.btnWhatsappSeller.setOnClickListener {
+            val url = "https://wa.me/${shopInfo?.noWhatsappShop}"
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse(url)
+            startActivity(intent)
+        }
+
+        binding.addressToShop.setOnClickListener {
+            val url = "https://www.google.com/maps/search/${shopInfo?.addressShop}"
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse(url)
+            intent.setClassName(
+                "com.google.android.apps.maps",
+                "com.google.android.maps.MapsActivity"
+            )
+            startActivity(intent)
+        }
+
+        binding.shimmerLoadingSub2Data.setOnClickListener {
+            val intent = Intent(binding.root.context, DetailShopActivity::class.java)
+            intent.putExtra("idShop", idShop)
+            startActivity(intent)
+        }
+
     }
 
     private fun setupViewModel() {
@@ -142,7 +154,7 @@ class DetailProductActivity : AppCompatActivity() {
                         } else {
                             hideShimmerProduct()
                             showProductData(productResponse)
-                            if ((productInfo != null) && (shopInfo != null) && (isAvailable != false)) {
+                            if ((productInfo != null) && (shopInfo != null) && (isAvailable != false) && (productType != "jasa")) {
                                 binding.btnAddToCart.isActivated = true
                                 binding.btnAddToCart.isEnabled = true
                                 binding.btnAddToCart.setBackgroundColor(
@@ -184,7 +196,7 @@ class DetailProductActivity : AppCompatActivity() {
                         } else {
                             hideShimmerShop()
                             showShopData(shopResponse)
-                            if ((productInfo != null) && (shopInfo != null) && (isAvailable != false)) {
+                            if ((productInfo != null) && (shopInfo != null) && (isAvailable != false) && (productType != "jasa")) {
                                 binding.btnAddToCart.isActivated = true
                                 binding.btnAddToCart.isEnabled = true
                                 binding.btnAddToCart.setBackgroundColor(
@@ -249,11 +261,13 @@ class DetailProductActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun showProductData(product: OneProduct) {
+        Log.d("ONEPRODUCTDATA", product.toString())
         binding.shimmerLoadingSub1.visibility = View.GONE
         binding.shimmerLoadingSub1Data.visibility = View.VISIBLE
 
         productInfo = product
         isAvailable = product.isAvailable
+        productType = product.productCategory
 
         binding.txtNameProduct.text = product.nameProduct
         binding.txtWeightProduct.text = "${product.productWeight} gram"
@@ -262,8 +276,10 @@ class DetailProductActivity : AppCompatActivity() {
 
         Glide.with(binding.root.context)
             .load(BUCKET_PRODUCT_URL + product.imgProduct)
-            .priority(Priority.HIGH)
             .placeholder(R.drawable.loading_animation)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .skipMemoryCache(true)
+            .priority(Priority.HIGH)
             .into(binding.imgDetailProduct)
 
         if (product.promoPrice != null) {

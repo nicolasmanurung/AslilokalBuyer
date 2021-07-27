@@ -9,11 +9,15 @@ import com.aslilokal.buyer.ui.account.register.RegisterViewModel
 import com.aslilokal.buyer.ui.account.verify.VerificationViewModel
 import com.aslilokal.buyer.ui.aslilokal.AslilokalViewModel
 import com.aslilokal.buyer.ui.beranda.BerandaViewModel
+import com.aslilokal.buyer.ui.bottomfragment.VoucherViewModel
 import com.aslilokal.buyer.ui.detail.DetailViewModel
 import com.aslilokal.buyer.ui.keranjang.KeranjangViewModel
 import com.aslilokal.buyer.ui.pembayaran.PembayaranViewModel
 import com.aslilokal.buyer.ui.pesanan.PesananViewModel
 import com.aslilokal.buyer.ui.profil.ProfilViewModel
+import com.aslilokal.buyer.ui.profil.edit.EditProfileViewModel
+import com.aslilokal.buyer.ui.search.SearchViewModel
+import com.aslilokal.buyer.ui.shop.ShopViewModel
 
 class AslilokalVMProviderFactory(private val apiHelper: ApiHelper) : ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -46,6 +50,21 @@ class AslilokalVMProviderFactory(private val apiHelper: ApiHelper) : ViewModelPr
         }
         if (modelClass.isAssignableFrom(ProfilViewModel::class.java)) {
             return ProfilViewModel(AslilokalRepository(apiHelper)) as T
+        }
+        if (modelClass.isAssignableFrom(ROViewModel::class.java)) {
+            return ROViewModel(AslilokalRepository(apiHelper)) as T
+        }
+        if (modelClass.isAssignableFrom(VoucherViewModel::class.java)) {
+            return VoucherViewModel(AslilokalRepository(apiHelper)) as T
+        }
+        if (modelClass.isAssignableFrom(ShopViewModel::class.java)) {
+            return ShopViewModel(AslilokalRepository(apiHelper)) as T
+        }
+        if (modelClass.isAssignableFrom(SearchViewModel::class.java)) {
+            return SearchViewModel(AslilokalRepository(apiHelper)) as T
+        }
+        if (modelClass.isAssignableFrom(EditProfileViewModel::class.java)) {
+            return EditProfileViewModel(AslilokalRepository(apiHelper)) as T
         }
         throw IllegalArgumentException("Unknown class name")
     }

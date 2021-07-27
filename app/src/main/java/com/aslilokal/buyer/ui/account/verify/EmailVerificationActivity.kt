@@ -16,28 +16,33 @@ import com.aslilokal.buyer.model.data.api.RetrofitInstance
 import com.aslilokal.buyer.utils.AslilokalDataStore
 import com.aslilokal.buyer.utils.Resource
 import com.aslilokal.buyer.viewmodel.AslilokalVMProviderFactory
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.TimeUnit
 
 class EmailVerificationActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEmailVerificationBinding
-    private var datastore = AslilokalDataStore(this)
+    private lateinit var datastore: AslilokalDataStore
     private lateinit var viewmodel: VerificationViewModel
     private lateinit var emailBuyer: String
     private lateinit var verifyToken: String
+    private lateinit var token: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityEmailVerificationBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        datastore = AslilokalDataStore(binding.root.context)
         hideProgress()
         setupViewModel()
         getTokenObservable()
         postResubmitObservable()
+
+        runBlocking {
+            token = datastore.read("TOKEN").toString()
+        }
 
         emailBuyer = intent.getStringExtra("emailBuyer")!!
         binding.tvEmail.text = emailBuyer
@@ -54,9 +59,8 @@ class EmailVerificationActivity : AppCompatActivity() {
                     //Toast.makeText(binding.root.context, s.toString(), Toast.LENGTH_SHORT).show()
                     binding.btnNextVerification.visibility = View.VISIBLE
 
-                    runBlocking {
+                    CoroutineScope(Dispatchers.Main).launch {
                         showProgress()
-                        val token = datastore.read("TOKEN").toString()
                         viewmodel.getVerifyTokenCode(token, verifyToken)
                     }
                 }
@@ -76,16 +80,13 @@ class EmailVerificationActivity : AppCompatActivity() {
         binding.btnNextVerification.setOnClickListener {
             showProgress()
             verifyToken = binding.etCode.text.toString()
-            runBlocking {
-                //Toast.makeText(binding.root.context, verifyToken, Toast.LENGTH_SHORT).show()
-                val token = datastore.read("TOKEN").toString()
+            CoroutineScope(Dispatchers.Main).launch {
                 viewmodel.getVerifyTokenCode(token, verifyToken)
             }
         }
 
         binding.txtResend.setOnClickListener {
-            runBlocking {
-                val token = datastore.read("TOKEN").toString()
+            CoroutineScope(Dispatchers.Main).launch {
                 viewmodel.postResubmitSendTokenVerify(token)
             }
         }
@@ -118,7 +119,7 @@ class EmailVerificationActivity : AppCompatActivity() {
                     hideProgress()
                     Toast.makeText(
                         binding.root.context,
-                        "Maaf ada kesalahan",
+                        response.message,
                         Toast.LENGTH_SHORT
                     ).show()
                 }

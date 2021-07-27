@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="4dp"
+    app:cardElevation="6dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp">
+
+        <ImageView
+            android:id="@+id/imgProduct"
+            android:layout_width="80dp"
+            android:layout_height="100dp"
+            android:layout_alignParentStart="true"
+            android:background="@color/grayFading"
+            android:scaleType="centerCrop" />
+
+        <TextView
+            android:id="@+id/txtNameProduct"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_toEndOf="@+id/imgProduct"
+            android:fontFamily="@font/roboto"
+            android:maxLines="2"
+            android:text="Nama Product"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            tools:ignore="SmallSp" />
+
+        <TextView
+            android:id="@+id/txtQtyProduct"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtNameProduct"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_toEndOf="@+id/imgProduct"
+            android:fontFamily="@font/roboto_light"
+            android:maxLines="2"
+            android:text="2 Item (400 gr)"
+            android:textColor="@color/black"
+            android:textSize="10sp"
+            tools:ignore="SmallSp" />
+
+        <TextView
+            android:id="@+id/txtNoteProduct"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtQtyProduct"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_toEndOf="@+id/imgProduct"
+            android:fontFamily="@font/roboto_light"
+            android:maxLines="2"
+            android:text="Catatan: Cabenya tolong dibanyakin"
+            android:textColor="@color/black"
+            android:textSize="10sp"
+            tools:ignore="SmallSp" />
+
+        <TextView
+            android:id="@+id/txtCurrentPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtNoteProduct"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="8dp"
+            android:layout_toEndOf="@+id/imgProduct"
+            android:fontFamily="@font/roboto_medium"
+            android:text="Rp 2.500.000"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>

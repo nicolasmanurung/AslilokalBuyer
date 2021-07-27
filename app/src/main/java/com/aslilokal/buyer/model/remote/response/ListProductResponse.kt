@@ -6,6 +6,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class ListProductResponse(
     val message: String,
-    val result: List<Product>,
+    val result: ArrayList<Product>,
     val success: Boolean
 ) : Parcelable

@@ -89,6 +89,7 @@
                         android:layout_alignParentEnd="true"
                         android:layout_centerInParent="true"
                         android:layout_marginEnd="16dp"
+                        android:padding="8dp"
                         android:fontFamily="@font/roboto_medium"
                         android:text="Ubah"
                         android:textColor="@color/black"
@@ -119,7 +120,8 @@
                                 android:fontFamily="@font/roboto_light"
                                 android:text="Nama Lengkap"
                                 android:textColor="@color/black"
-                                android:textSize="10sp" />
+                                android:textSize="10sp"
+                                tools:ignore="SmallSp" />
 
                             <TextView
                                 android:id="@+id/txtNameBuyer"
@@ -146,7 +148,8 @@
                                 android:fontFamily="@font/roboto_light"
                                 android:text="Alamat"
                                 android:textColor="@color/black"
-                                android:textSize="10sp" />
+                                android:textSize="10sp"
+                                tools:ignore="SmallSp" />
 
                             <TextView
                                 android:id="@+id/txtAddress"

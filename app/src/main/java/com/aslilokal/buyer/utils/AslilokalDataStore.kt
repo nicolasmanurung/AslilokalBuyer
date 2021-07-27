@@ -6,7 +6,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 
-private val Context.dataStore by preferencesDataStore("buyersettings");
+private val Context.dataStore by preferencesDataStore("buyersettings")
 
 class AslilokalDataStore(context: Context) {
     private val dataStore = context.dataStore

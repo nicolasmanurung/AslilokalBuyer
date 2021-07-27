@@ -25,5 +25,6 @@ data class OneProduct(
     val priceServiceRange: String,
     val productCategory: String,
     val productWeight: Int,
-    val promoPrice: Int?
+    val promoPrice: Int?,
+    val sumCountView: Int
 ) : Parcelable

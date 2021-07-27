@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.aslilokal.buyer.databinding.ItemPesananBinding
 import com.aslilokal.buyer.model.remote.response.ResultOrder
+import com.aslilokal.buyer.ui.detail.pesanan.DetailPesananActivity
 import com.aslilokal.buyer.ui.pembayaran.verifikasipembayaran.VerifikasiPembayaranActivity
 import com.aslilokal.buyer.utils.Constants.Companion.BUCKET_PRODUCT_URL
 import com.aslilokal.buyer.utils.CustomFunctions
@@ -27,7 +28,6 @@ class PesananAdapter :
 
         @SuppressLint("SetTextI18n")
         fun bind(order: ResultOrder) {
-
             Glide.with(itemView.context)
                 .load(BUCKET_PRODUCT_URL + order.products[0].imgProduct)
                 .priority(Priority.HIGH)
@@ -44,16 +44,29 @@ class PesananAdapter :
 
             when (order.statusOrder) {
                 "paymentrequired" -> {
-                    binding.txtStatusOrder.text = "Menunggu konfirmasi"
+                    binding.txtStatusOrder.text = "Menunggu konfirmasi pembayaran"
                     binding.btnAcceptOrder.text = "Bayar"
-
-                    binding.btnAcceptOrder.setOnClickListener {
-                        binding.root.context.startActivity(
-                            Intent(
-                                binding.root.context,
-                                VerifikasiPembayaranActivity::class.java
+                    if (CustomFunctions().isDeathTimeOrder(order.orderAt)) {
+                        // Intent ke Lihat Order
+                    } else {
+                        binding.btnAcceptOrder.setOnClickListener {
+                            binding.root.context.startActivity(
+                                Intent(
+                                    binding.root.context,
+                                    VerifikasiPembayaranActivity::class.java
+                                )
                             )
-                        )
+                        }
+                    }
+                }
+                "acceptrequired" -> {
+                    binding.txtStatusOrder.text = "Pesanan diteruskan ke penjual"
+                    binding.btnAcceptOrder.text = "Lihat"
+                    binding.btnAcceptOrder.setOnClickListener {
+                        val intent = Intent(binding.root.context, DetailPesananActivity::class.java)
+                        intent.putExtra("idOrder", order._id)
+//                    intent.putExtra("statusOrder", order.statusOrder)
+                        binding.root.context.startActivity(intent)
                     }
                 }
                 "process" -> {
@@ -64,7 +77,12 @@ class PesananAdapter :
                     binding.btnAcceptOrder.strokeWidth = 1
                     binding.btnAcceptOrder.setBackgroundColor(Color.WHITE)
                     binding.btnAcceptOrder.setTextColor(Color.parseColor("#FF7676"))
-
+                    binding.btnAcceptOrder.setOnClickListener {
+                        val intent = Intent(binding.root.context, DetailPesananActivity::class.java)
+                        intent.putExtra("idOrder", order._id)
+//                    intent.putExtra("statusOrder", order.statusOrder)
+                        binding.root.context.startActivity(intent)
+                    }
 //                    when (order.isCancelBuyer) {
 //                        true -> {
 //                            binding.txtStatusOrder.text = "Pengajuan batal"
@@ -96,7 +114,7 @@ class PesananAdapter :
                         "seller" -> {
                             binding.txtStatusOrder.text = "Sedang diantar"
                         }
-                        "pickup" -> {
+                        "CUSTOM Dijemput Sendiri" -> {
                             binding.txtStatusOrder.text = "Harap jemput"
                         }
                         else -> {
@@ -132,19 +150,28 @@ class PesananAdapter :
                     binding.btnAcceptOrder.setTextColor(Color.parseColor("#FF7676"))
                 }
             }
-//            itemView.setOnClickListener {
-//
-//            }
+            if (order.statusOrder == "paymentrequired" && CustomFunctions().isDeathTimeOrder(order.orderAt)) {
+                binding.txtStatusOrder.text = "Pesanan kadaluarsa"
+                binding.btnAcceptOrder.text = "Lihat"
+                binding.btnAcceptOrder.setBackgroundColor(Color.GRAY)
+            } else {
+                itemView.setOnClickListener {
+                    val intent = Intent(binding.root.context, DetailPesananActivity::class.java)
+                    intent.putExtra("idOrder", order._id)
+//                    intent.putExtra("statusOrder", order.statusOrder)
+                    binding.root.context.startActivity(intent)
+                }
+            }
         }
     }
 
     private val differCallback = object : DiffUtil.ItemCallback<ResultOrder>() {
         override fun areItemsTheSame(oldItem: ResultOrder, newItem: ResultOrder): Boolean {
-            return oldItem._id == newItem._id
+            return oldItem == newItem
         }
 
         override fun areContentsTheSame(oldItem: ResultOrder, newItem: ResultOrder): Boolean {
-            return oldItem == newItem
+            return oldItem._id == newItem._id
         }
     }
 
