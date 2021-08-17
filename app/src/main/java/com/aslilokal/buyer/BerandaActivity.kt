@@ -1,6 +1,7 @@
 package com.aslilokal.buyer
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -30,8 +31,14 @@ class BerandaActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityBerandaBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         datastore = AslilokalDataStore(binding.root.context)
+        // Orientation Change
+        requestedOrientation = if (resources.getBoolean(R.bool.portrait_only)) {
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        } else {
+            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        }
+
         runBlocking {
             isLogin = datastore.read("ISLOGIN").toString().toBoolean()
             username = datastore.read("USERNAME").toString()
@@ -180,7 +187,7 @@ class BerandaActivity : AppCompatActivity() {
         doubleBackToExitPressedOnce = true
         Toast.makeText(this, "Tekan kembali sekali lagi untuk keluar", Toast.LENGTH_SHORT)
             .show()
-        GlobalScope.launch(Dispatchers.Main) {
+        CoroutineScope(Dispatchers.Main).launch {
             delay(2000)
             doubleBackToExitPressedOnce = false
         }

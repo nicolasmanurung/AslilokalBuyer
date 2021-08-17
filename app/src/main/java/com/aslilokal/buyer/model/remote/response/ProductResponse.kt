@@ -38,10 +38,12 @@ data class Product(
     val nameProduct: String,
     val priceProduct: String,
     val priceServiceRange: String,
-    val productCategory: String,
+    val productCategory: String?,
+    val typeProduct: String,
     val productWeight: Int,
     val umkmTags: String?,
     val promotionTags: ArrayList<String>?,
     val promoPrice: String? = null,
-    val sumCountView: Int
+    val sumCountView: Int,
+    val aslilokalInformation: City?
 ) : Parcelable

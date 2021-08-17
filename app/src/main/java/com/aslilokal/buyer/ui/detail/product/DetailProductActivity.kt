@@ -2,6 +2,7 @@ package com.aslilokal.buyer.ui.detail.product
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -32,6 +33,8 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.Priority
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.tuonbondol.textviewutil.strike
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.*
@@ -58,7 +61,13 @@ class DetailProductActivity : AppCompatActivity() {
         setContentView(binding.root)
         datastore = AslilokalDataStore(binding.root.context)
 
-        runBlocking {
+        requestedOrientation = if (resources.getBoolean(R.bool.portrait_only)) {
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        } else {
+            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        }
+
+        CoroutineScope(Dispatchers.Main).launch {
             isLogin = datastore.read("ISLOGIN").toString().toBoolean()
 
             if (isLogin == true) {

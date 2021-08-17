@@ -97,6 +97,7 @@ class EmailVerificationActivity : AppCompatActivity() {
         viewmodel.emailVerivications.observe(this, { response ->
             when (response) {
                 is Resource.Success -> {
+                    hideProgress()
                     response.data.let { tokenVerifyResponse ->
                         if (tokenVerifyResponse?.success == false) {
                             Toast.makeText(
@@ -131,6 +132,7 @@ class EmailVerificationActivity : AppCompatActivity() {
         viewmodel.tokenResubmits.observe(this, { response ->
             when (response) {
                 is Resource.Success -> {
+                    hideProgress()
                     response.data.let { resubmitTokenResponse ->
                         if (resubmitTokenResponse?.success == false) {
                             Toast.makeText(
@@ -139,9 +141,13 @@ class EmailVerificationActivity : AppCompatActivity() {
                                 Toast.LENGTH_SHORT
                             ).show()
                         } else if (resubmitTokenResponse?.success == true) {
-                            Toast.makeText(this, response.message, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                binding.root.context,
+                                resubmitTokenResponse.message,
+                                Toast.LENGTH_SHORT
+                            )
+                                .show()
                             binding.txtResend.visibility = View.GONE
-
                             binding.tvReceive.visibility = View.VISIBLE
                             binding.tvTime.visibility = View.VISIBLE
                             countDownTimer.start()
@@ -155,7 +161,11 @@ class EmailVerificationActivity : AppCompatActivity() {
 
                 is Resource.Error -> {
                     hideProgress()
-                    Toast.makeText(this, "Ada kesalahan", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        binding.root.context,
+                        response.message.toString(),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         })

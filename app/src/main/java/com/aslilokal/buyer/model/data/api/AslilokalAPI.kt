@@ -78,10 +78,10 @@ interface AslilokalAPI {
         @Query("tokenVerify") tokenVerify: String
     ): Response<StatusResponse>
 
-    @FormUrlEncoded
     @POST("buyer/verify")
     suspend fun postResubmitVerifyToken(
-        @Header("Authorization") token: String
+        @Header("Authorization") token: String,
+        @Body emptyRequest: Any = Object()
     ): Response<StatusResponse>
 
     @FormUrlEncoded

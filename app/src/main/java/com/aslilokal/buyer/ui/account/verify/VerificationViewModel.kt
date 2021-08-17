@@ -75,7 +75,7 @@ class VerificationViewModel(private val mainRepository: AslilokalRepository) : V
         } catch (exception: Exception) {
             when (exception) {
                 is IOException -> tokenResubmits.postValue(Resource.Error("Jaringan lemah"))
-                else -> tokenResubmits.postValue(Resource.Error("Kesalahan tak terduga"))
+                else -> tokenResubmits.postValue(Resource.Error(exception.message.toString()))
             }
         }
     }
@@ -128,7 +128,7 @@ class VerificationViewModel(private val mainRepository: AslilokalRepository) : V
             }
         } catch (exception: Exception) {
             when (exception) {
-                is IOException -> biodataResults.postValue(Resource.Error("Jaringan lemah"))
+                is IOException -> biodataResults.postValue(Resource.Error("Jaringan lemah, Coba Ganti Foto"))
                 else -> biodataResults.postValue(Resource.Error("Kesalahan tak terduga"))
             }
         }
